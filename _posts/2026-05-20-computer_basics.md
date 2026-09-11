@@ -1643,7 +1643,7 @@ Get-Process | Where-Object { $_.CPU -gt 10 } | Sort-Object CPU -Descending
 # Sort-Object 排序对象
 ```
 
-简单命令用cmd，复制命令用PowerShell。
+简单命令用cmd，复制杂命令用PowerShell。
 
 ### 2.8 notepad.exe（记事本）
 
@@ -1772,7 +1772,7 @@ Get-Process | Where-Object { $_.CPU -gt 10 } | Sort-Object CPU -Descending
 | 网络连接按进程细分      | 资源监视器 → 网络选项卡             |
 | GPU 显存按进程细分      | GPU-Z、任务管理器（Win10 1809+ 有） |
 
-某些操作（如结束系统进程）需要管理员权限
+某些操作（如结束系统进程）需要管理员权限。
 
 ### 2.12 regedit（注册表编辑器）
 
