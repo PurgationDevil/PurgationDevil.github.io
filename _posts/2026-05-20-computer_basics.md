@@ -5609,7 +5609,7 @@ X-Xss-Protection: 1;mode=block
 Content-Length: 644114
 ```
 
-这是一个真实的百度发来的响应包，成功以http协议访问了百度。这里的包是有 `Strict-Transport-Security` (HSTS) 头表示百度告诉你：“下次必须用 HTTPS”。也就是说，如果我们在从这里动一些什么，就会强制变成http协议。
+这是一个真实的百度发来的响应包，成功以http协议访问了百度。这里的包是有 `Strict-Transport-Security` (HSTS) 头表示百度告诉你：“下次必须用 HTTPS”。也就是说，如果我们在从这里动一些什么，就会强制变成https协议。
 
 第三段：200 OK —— “Burp Suite伪造（这是冒牌货）”
 
