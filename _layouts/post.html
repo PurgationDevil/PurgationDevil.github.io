@@ -9,6 +9,12 @@ layout: default
 <!-- 图片放大 + 懒加载 + 代码复制 -->
 <script defer src="/js/post-enhance.js"></script>
 
+<!-- 英语单词点击朗读（仅 front matter 中 word-reader: true 的文章加载） -->
+{% if page.word-reader %}
+<link rel="stylesheet" href="/css/word-reader.css">
+<script defer src="/js/word-reader.js"></script>
+{% endif %}
+
 <!-- Image to hack wechat -->
 <!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
 <!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
