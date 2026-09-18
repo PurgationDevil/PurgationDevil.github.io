@@ -34,7 +34,7 @@
   bar.className = 'wr-toggle-bar';
   bar.innerHTML =
     '<button type="button" class="wr-toggle-btn" aria-pressed="false">🔊 开启单词朗读</button>' +
-    '<span class="wr-tip">开启后，点击文章里任意英文单词即可朗读（不影响中文、代码与公式）</span>';
+    '<span class="wr-tip">开启后，点击文章里任意英文单词即可朗读</span>';
   container.insertBefore(bar, container.firstChild);
 
   var btn = bar.querySelector('.wr-toggle-btn');
