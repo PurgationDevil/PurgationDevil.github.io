@@ -1,0 +1,101 @@
+/* ============================================================
+ * word-reader.css — 英语单词点击朗读（仅 word-reader: true 的文章）
+ * 风格与博客统一：浅色 #0085a1 / 深色 #00d4ff
+ * ============================================================ */
+
+/* ---------- 顶部开关栏 ---------- */
+.wr-toggle-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 24px 0;
+  padding: 12px 16px;
+  background: rgba(0, 133, 161, 0.06);
+  border: 1px solid rgba(0, 133, 161, 0.25);
+  border-radius: 10px;
+}
+
+.wr-toggle-btn {
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #ffffff;
+  background: #0085a1;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.wr-toggle-btn:hover {
+  background: #006680;
+}
+
+.wr-toggle-btn:active {
+  transform: scale(0.97);
+}
+
+.wr-tip {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ---------- 开启后正文里的可点击英文单词 ---------- */
+.wr-word {
+  color: #0085a1 !important;
+  border-bottom: 1px dashed rgba(0, 133, 161, 0.55);
+  border-radius: 3px;
+  padding: 0 1px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.wr-word:hover {
+  background: rgba(0, 133, 161, 0.12);
+}
+
+/* 朗读中高亮 */
+.wr-word.speaking {
+  color: #ffffff !important;
+  background: #0085a1;
+  border-bottom-color: #0085a1;
+}
+
+/* ---------- 深色模式 ---------- */
+@media (prefers-color-scheme: dark) {
+  .wr-toggle-bar {
+    background: rgba(0, 212, 255, 0.08);
+    border-color: rgba(0, 212, 255, 0.3);
+  }
+
+  .wr-toggle-btn {
+    color: #04222e;
+    background: #00d4ff;
+  }
+
+  .wr-toggle-btn:hover {
+    background: #33ddff;
+  }
+
+  .wr-tip {
+    color: #9fb3c0;
+  }
+
+  .wr-word {
+    color: #00d4ff !important;
+    border-bottom-color: rgba(0, 212, 255, 0.55);
+  }
+
+  .wr-word:hover {
+    background: rgba(0, 212, 255, 0.14);
+  }
+
+  .wr-word.speaking {
+    color: #04222e !important;
+    background: #00d4ff;
+    border-bottom-color: #00d4ff;
+  }
+}
