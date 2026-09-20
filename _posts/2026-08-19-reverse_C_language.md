@@ -4,7 +4,7 @@ title: "逆向 -- C/C++ 进阶"
 toc: true
 date: 2026-09-20
 categories: 分类名称
-tags: [C/C++][逆向工程]
+tags: ["C/C++", 逆向工程]
 ---
 
 ## 前言
