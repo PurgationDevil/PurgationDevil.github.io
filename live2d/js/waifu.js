@@ -171,6 +171,16 @@ function setParticlesRunning(run) {
 var particlesResumeTimer = null;
 var live2dResumeTimer = null;
 
+// 后台时隐藏全屏 canvas 合成层（visibility:hidden 不触发 reflow、不丢 WebGL 上下文），
+// 让浏览器解冻瞬间只需恢复轻量 DOM，合成层随后错峰重建
+function setCanvasesHidden(hidden) {
+    var ids = ['particles-js', 'live2d', 'clickCanvas'];
+    for (var i = 0; i < ids.length; i++) {
+        var el = document.getElementById(ids[i]);
+        if (el) el.style.visibility = hidden ? 'hidden' : '';
+    }
+}
+
 document.addEventListener('visibilitychange', function () {
     if (document.hidden) {
         if (window.hitokotoTimer) {
@@ -181,14 +191,22 @@ document.addEventListener('visibilitychange', function () {
         if (live2dResumeTimer) { clearTimeout(live2dResumeTimer); live2dResumeTimer = null; }
         setParticlesRunning(false);
         window.__live2dPaused = true;
+        setCanvasesHidden(true);
     } else {
         // 错峰恢复：粒子 300ms、看板娘 600ms，削平解冻瞬间的渲染高峰
         particlesResumeTimer = setTimeout(function () {
+            var el = document.getElementById('particles-js');
+            if (el) el.style.visibility = '';
             setParticlesRunning(true);
             particlesResumeTimer = null;
         }, 300);
         live2dResumeTimer = setTimeout(function () {
+            // 先恢复绘制再显示，避免 preserveDrawingBuffer:false 下的透明闪烁
             window.__live2dPaused = false;
+            var el = document.getElementById('live2d');
+            if (el) el.style.visibility = '';
+            var cc = document.getElementById('clickCanvas');
+            if (cc) cc.style.visibility = '';
             live2dResumeTimer = null;
         }, 600);
         if (!window.hitokotoTimer) startHitokotoTimer();
