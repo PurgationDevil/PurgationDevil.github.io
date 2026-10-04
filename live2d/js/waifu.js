@@ -103,7 +103,8 @@ initTips();
     showMessage(text, 6000);
 })();
 
-window.hitokotoTimer = window.setInterval(showHitokoto,60000);
+window.hitokotoTimer = null;
+startHitokotoTimer();
 
 function showHitokoto() {
     $.getJSON("https://v1.hitokoto.cn/", function (result) {
@@ -140,3 +141,56 @@ function initLive2d() {
 }
 
 initLive2d();
+
+/* ---------- 标签页后台/前台管理 ----------
+ * 后台时：暂停一言轮询、粒子背景、看板娘渲染，让标签页可以深度休眠；
+ * 前台时：两个动画错峰恢复，避开浏览器解冻瞬间合成层集中重建造成的卡顿。
+ */
+function startHitokotoTimer() {
+    if (window.hitokotoTimer) clearInterval(window.hitokotoTimer);
+    window.hitokotoTimer = window.setInterval(showHitokoto, 60000);
+}
+
+function setParticlesRunning(run) {
+    try {
+        var inst = window.pJSDom && window.pJSDom[0] && window.pJSDom[0].pJS;
+        if (!inst || !inst.fn) return;
+        if (run) {
+            // 已有动画句柄说明还在运行，避免重复启动循环
+            if (inst.fn.drawAnimFrame) return;
+            if (inst.fn.vendors && typeof inst.fn.vendors.draw === 'function') {
+                inst.fn.vendors.draw();
+            }
+        } else if (window.cancelAnimationFrame && inst.fn.drawAnimFrame) {
+            window.cancelAnimationFrame(inst.fn.drawAnimFrame);
+            inst.fn.drawAnimFrame = null;
+        }
+    } catch (e) {}
+}
+
+var particlesResumeTimer = null;
+var live2dResumeTimer = null;
+
+document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+        if (window.hitokotoTimer) {
+            clearInterval(window.hitokotoTimer);
+            window.hitokotoTimer = null;
+        }
+        if (particlesResumeTimer) { clearTimeout(particlesResumeTimer); particlesResumeTimer = null; }
+        if (live2dResumeTimer) { clearTimeout(live2dResumeTimer); live2dResumeTimer = null; }
+        setParticlesRunning(false);
+        window.__live2dPaused = true;
+    } else {
+        // 错峰恢复：粒子 300ms、看板娘 600ms，削平解冻瞬间的渲染高峰
+        particlesResumeTimer = setTimeout(function () {
+            setParticlesRunning(true);
+            particlesResumeTimer = null;
+        }, 300);
+        live2dResumeTimer = setTimeout(function () {
+            window.__live2dPaused = false;
+            live2dResumeTimer = null;
+        }, 600);
+        if (!window.hitokotoTimer) startHitokotoTimer();
+    }
+});

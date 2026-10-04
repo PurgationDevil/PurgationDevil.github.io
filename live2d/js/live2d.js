@@ -648,6 +648,7 @@
                     , e = 0 == this.lastTime ? 0 : (i - this.lastTime) / 1e3;
                 this.lastTime = i,
                 e < 0 && (e = 0);
+                e > .1 && (e = 0);
                 for (var r = 0; r < this.partsGroups.length; r++)
                     this.normalizePartsOpacityGroup(t, this.partsGroups[r], e),
                         this.copyOpacityOtherParts(t, this.partsGroups[r])
@@ -741,6 +742,7 @@
             var i = UtSystem.getUserTimeMSec()
                 , e = (i - this.lastTimeSec) * p.FRAME_RATE / 1e3;
             this.lastTimeSec = i;
+            if (e > p.FRAME_RATE) e = 0;
             var r = .15 * p.FRAME_RATE
                 , o = e * t / r
                 , n = this.faceTargetX - this.faceX
@@ -1035,16 +1037,18 @@
         function s() {
             b || (b = !0,
                 function t() {
-                    _();
                     var i = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-                    if (window.Live2D.captureFrame) {
-                        window.Live2D.captureFrame = !1;
-                        var e = document.createElement("a");
-                        document.body.appendChild(e),
-                            e.setAttribute("type", "hidden"),
-                            e.href = C.toDataURL(),
-                            e.download = window.Live2D.captureName || "live2d.png",
-                            e.click()
+                    if (!window.__live2dPaused) {
+                        _();
+                        if (window.Live2D.captureFrame) {
+                            window.Live2D.captureFrame = !1;
+                            var e = document.createElement("a");
+                            document.body.appendChild(e),
+                                e.setAttribute("type", "hidden"),
+                                e.href = C.toDataURL(),
+                                e.download = window.Live2D.captureName || "live2d.png",
+                                e.click()
+                        }
                     }
                     i(t, C)
                 }())
@@ -2573,6 +2577,7 @@
                             return this._$iP = this._$iT = i,
                                 void (this._$Fo = Math.sqrt((this.p1.x - this.p2.x) * (this.p1.x - this.p2.x) + (this.p1.y - this.p2.y) * (this.p1.y - this.p2.y)));
                         var e = (i - this._$iT) / 1e3;
+                        if (e > .1) e = .033;
                         if (0 != e) {
                             for (var r = this._$lL.length - 1; r >= 0; --r) {
                                 this._$lL[r]._$oP(t, this)
