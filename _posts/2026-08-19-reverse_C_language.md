@@ -2,7 +2,7 @@
 layout: post
 title: "逆向 -- C/C++ 进阶"
 toc: true
-date: 2026-09-20
+date: 2026-10-08
 categories: 分类名称
 tags: ["C/C++", 逆向工程]
 ---
@@ -3625,7 +3625,7 @@ sub_401000(1, 2, 3);
 
 ------
 
-### 3. 最常见的几种
+### 2. 最常见的几种
 
 现在不用一次全背。先认识名字：
 
@@ -3673,7 +3673,7 @@ add esp, 8     ; 调用者清栈（2个参数 × 4字节）
 ├─────────┤
 │   10    │ ← a
 ├─────────┤
-│ 返回地址 │
+│   ret   │
 └─────────┘
 ```
 
@@ -3793,9 +3793,535 @@ call Attack
 
 所以 `this` 本质上也是一个参数，只不过它是 **C++ 成员函数隐藏的参数。**
 
+例如 IDA：
+
+```c
+void __thiscall sub_401000(int a1, int a2)
+{
+    *(_DWORD *)(a1 + 4) -= a2;
+}
+```
+
+现在的水准应该能看出：a1 很可能是 this，而 a2 是普通参数
+
+于是可以还原成：
+
+```cpp
+void Player::Damage(int damage)
+{
+    this->hp -= damage;
+}
+```
+
+这就是非常典型的逆向还原。
+
 ------
 
-*加速更新中......*
+但是，x64 又不太一样。
+
+```asm
+mov rcx, ...
+mov rdx, ...
+mov r8, ...
+mov r9, ...
+call xxx
+```
+
+这是 Windows x64 常见的参数传递方式。
+
+可以先死死记住这个：
+
+```text
+Windows x64
+
+第1个参数 → RCX
+第2个参数 → RDX
+第3个参数 → R8
+第4个参数 → R9
+```
+
+例如：
+
+```c
+func(a, b, c, d);
+```
+
+大致就是：
+
+```text
+RCX = a
+RDX = b
+R8  = c
+R9  = d
+```
+
+然后：
+
+```asm
+call func
+```
+
+------
+
+如果是 C++ 成员函数呢？
+
+这就非常重要了。
+
+假设：
+
+```cpp
+player.Attack(100);
+```
+
+现代 Windows x64 下，经常可以理解成：
+
+```text
+RCX = this
+RDX = 100
+```
+
+也就是：
+
+```mermaid
+flowchart TD
+    RCX --> this --> Player对象
+    RDX --> damage --> 100
+```
+
+所以看到：
+
+```asm
+mov rcx, rbx
+mov edx, 100
+call sub_140001000
+```
+
+就可以产生一个非常合理的假设：
+
+```c
+sub_140001000(this, 100);
+```
+
+甚至可能对应：
+
+```cpp
+player.Attack(100);
+```
+
+------
+
+### 3. 返回值呢？
+
+参数传进去以后，还有一个问题：
+
+> 函数算完以后，结果放哪？
+
+比如：
+
+```c
+int add(int a, int b)
+{
+    return a + b;
+}
+```
+
+在 Windows x64 常见情况下，整数返回值在 RAX 里。
+
+例如：
+
+```asm
+mov eax, 30
+ret
+```
+
+调用者：
+
+```asm
+call add
+```
+
+回来以后：
+
+```text
+EAX = 30
+```
+
+所以以后看到：
+
+```asm
+call sub_401000
+test eax, eax
+```
+
+或者：
+
+```asm
+call sub_401000
+cmp eax, 0
+```
+
+就应该想到：**刚刚调用的函数可能返回了一个值，而这个返回值在 eax/rax 里。**
+
+这在 IDA 里非常重要。
+
+------
+
+### 4.例子 🌰
+
+C++：
+
+```cpp
+class Player
+{
+public:
+    int hp;
+
+    int Damage(int x)
+    {
+        hp -= x;
+        return hp;
+    }
+};
+```
+
+调用：
+
+```cpp
+Player p;
+int result = p.Damage(10);
+```
+
+概念上：
+
+```c
+p.Damage(10)
+
+this = &p
+x    = 10
+```
+
+在 Windows x64 下可以粗略想成：
+
+```asm
+rcx = &p
+rdx = 10
+```
+
+然后：
+
+```asm
+call Damage
+```
+
+函数执行：
+
+```asm
+mov eax, [rcx+8]
+sub eax, edx
+mov [rcx+8], eax
+ret
+```
+
+最后就可以翻译为：
+
+```mermaid
+flowchart LR
+    subgraph 参数
+        RCX["RCX"] --> this["this"]
+        EDX["EDX"] --> x["x"]
+    end
+    subgraph 对象
+        this -->|+8| hp["hp"]
+    end
+    subgraph 计算
+        hp --> EAX["EAX"]
+        x --> EAX
+    end
+    subgraph 返回
+        EAX --> RAXEAX["RAX/EAX"]
+        RAXEAX --> ret["返回值"]
+    end
+```
+
+于是：
+
+```cpp
+int Player::Damage(int x)
+{
+    hp -= x;
+    return hp;
+}
+```
+
+------
+
+现在应该建立的 “逆向脑回路”：以后看到一个函数：
+
+```asm
+mov rcx, rbx
+mov edx, 10
+call sub_xxx
+test eax, eax
+```
+
+不要只是：“好多汇编，好烦。”
+
+而是开始自动拆：
+
+```asm
+mov rcx, rbx	;第一个参数
+mov edx, 10		;第二个参数
+call sub_xxx	;调用函数
+test eax, eax	;检查返回值
+```
+
+于是：
+
+```c
+sub_xxx(rbx, 10);
+```
+
+并且它很可能返回一个值：
+
+```c
+int result = sub_xxx(rbx, 10);
+```
+
+如果 `rbx` 又是一个对象地址：
+
+```mermaid
+flowchart LR
+    RBX --> Player* --> RCX --> this
+```
+
+那就进一步可能是：
+
+```cpp
+player.SomeFunction(10);
+```
+
+------
+
+### 小节
+
+现在的知识树已经挺完整了
+
+```text
+① 指针
+② 结构体 + 偏移
+③ this + C++对象 + vtable
+④ 数组 + 指针
+⑤ 函数指针
+⑥ 函数调用约定
+⑦ 参数传递 + 返回值
+```
+
+而这套东西最终就是为了让你看懂 IDA 里这种东西：
+
+```c
+(*(void (__thiscall **)(int))(*(_DWORD *)a1 + 4))(a1);
+```
+
+现在已经能拆出其中相当一部分了：
+
+- void → 返回值
+- __thiscall → 调用约定
+- ** → 函数指针
+- (int) → 函数参数
+- (*(_DWORD *)a1 + 4) → 寻找函数地址
+- (a1) → 调用时传入 a1
+
+**下一步建议就应该多加练习了，多找一些题，把每一个括号、每一个 `\*`、每一个 `_DWORD` 从里到外完整地拆一遍。**
+
+------
+
+## “管理程序一类的代码”
+
+日常逆向中可能碰到一些：
+
+```c++
+class Player;
+class Enemy;
+class Weapon;
+class Item;
+class Skill;
+class GameObject;
+class Scene;
+class Manager;
+```
+
+然后还有：
+
+```c++
+GameManager
+PlayerManager
+EnemyManager
+ResourceManager
+SceneManager
+EventManager
+```
+
+这种东西。这里要注意：这已经不单纯是 C 语法问题了，而是**程序设计方式**的问题。
+
+因为**它们的核心不再是 “算法”，而是 “对象之间的关系”。**
+
+比如：
+
+```c++
+player.hp -= damage;
+```
+
+这是一个玩家掉血的**动作**，很好理解。
+
+但是管理型代码可能是：
+
+```c++
+players[i]->TakeDamage(damage);
+```
+
+甚至：
+
+```c++
+manager->GetPlayer(id)->GetComponent<Health>()->TakeDamage(damage);
+```
+
+再复杂一点：
+
+```c++
+scene->GetEntityManager()
+     ->GetEntity(id)
+     ->GetComponent<Health>()
+     ->TakeDamage(damage);
+```
+
+------
+
+### 1. “管理程序” 的典型特点：Manager
+
+```c++
+XXXManager
+```
+
+这就是**集中管理一堆 XXX**
+
+比如：
+
+```c++
+class EnemyManager
+{
+    Enemy* enemies[100];
+
+public:
+    Enemy* GetEnemy(int id);
+    void AddEnemy(Enemy* enemy);
+    void RemoveEnemy(int id);
+    void UpdateAll();
+};
+```
+
+本质上可能就是：
+
+```text
+EnemyManager
+      ├── Enemy 0
+      ├── Enemy 1
+      ├── Enemy 2
+      ├── Enemy 3
+      └── ...
+```
+
+所以 `manager->GetEnemy(3)` 其实没那么神秘，就是 “给我第三号 Enemy。”
+
+------
+
+### 2. 再进一步：为什么要“管理”？
+
+因为大型程序不能这样写：
+
+```c++
+Player player1;
+Player player2;
+Player player3;
+Player player4;
+...
+Player player999;
+```
+
+那程序员早疯了。
+
+所以需要 `PlayerManager manager;` 进行管理。然后：
+
+```c++
+manager.AddPlayer(...);
+manager.RemovePlayer(...);
+manager.GetPlayer(...);
+manager.UpdateAll();
+```
+
+这其实就是一种**程序设计思想**：把大量同类型或相关对象集中起来管理。
+
+这类思想在游戏、GUI、服务器、操作系统组件、引擎、业务系统里都非常常见。
+
+------
+
+### 3. 最重要的一点：管理程序经常“层层调用”
+
+```text
+GameManager
+    ↓
+SceneManager
+    ↓
+EntityManager
+    ↓
+Entity
+    ↓
+Component
+    ↓
+HealthComponent
+    ↓
+TakeDamage()
+```
+
+所以这时候就不要试图：“我今天一定要把这几百上千行代码全部看懂。”
+
+正确方法是问：
+
+**第一层：我现在在哪？**
+
+```text
+GameManager？
+SceneManager？
+Entity？
+```
+
+**第二层：它手里拿着什么？**
+
+```text
+对象？
+数组？
+指针？
+容器？
+```
+
+**第三层：它调用谁？**
+
+```text
+GetXXX()
+CreateXXX()
+UpdateXXX()
+DestroyXXX()
+```
+
+**第四层：最终干了什么？**
+
+```text
+修改数据？
+调用函数？
+创建对象？
+删除对象？
+```
+
+这样就不会被一大坨代码淹没。所以面对管理型程序，更好的方式是**先看结构，再看函数，最后看具体逻辑。**这就已经不属于代码层面的问题了，而是分析先后的逻辑问题。
 
 ------
 
