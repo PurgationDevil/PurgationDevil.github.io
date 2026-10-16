@@ -2,14 +2,14 @@
 layout: post
 title: "攻防世界 reverse II"
 toc: true
-date: 2026-10-11
+date: 2026-07-27
 categories: 分类名称
 tags: [逆向工程]
 ---
 
 # 攻防世界 reverse II
 
-## crackeme
+## crackeme - GFSJ1027（普通 x86 逆向）
 
 拿到题目，扔进 Ubuntu 观察程序。密码验证题。
 
@@ -429,6 +429,79 @@ flag：
 
 ```text
 flag{y0u_g0t_p455c0d3}
+```
+
+------
+
+## riskv-and-reward - GFSJ0872（架构识别 + 环境搭建）
+
+ELF 可执行文件，无壳。
+
+IDA 静态分析：Ctrl + F 没有找到 main 函数。但是从汇编码指令看得出来该程序架构与普通架构不一样，所以这一次的 start 函数与上一题的不一样，这就需要逐一判断。
+
+```c
+void __noreturn start(__int64 a1,__int64 a2,__int64 a3,__int64 a4,__int64 a5,__int64 a6,__int64 a7,__int64 a8,int a9,...)
+{
+  __int64 v9; // a0
+  __int64 v10; // a0
+  va_list va; // [sp+8h] [+8h] BYREF
+
+  va_start(va, a9);
+  sub_12640(0x160B8u, 0, 0);			// 初始化
+  v9 = sub_123E4(&sub_12428);
+  sub_12484(v9);
+  v10 = sub_1232C(a9, (char *)va, 0);	// 主函数
+  sub_123F8(v10);						// 退出
+}
+```
+
+从函数传参上基本可以看出 `sub_1232C` 就算 main。双击进入该函数事实也确实如此（有字符串）。
+
+而且该函数的结果传给最后的退出函数。所以这个就是 main 函数。
+
+```c
+int __cdecl main(int argc, const char **argv, const char **envp)
+{
+  _DWORD v4[32]; // [sp+8h] [-D8h] BYREF
+  _BYTE v5[68]; // [sp+88h] [-58h] BYREF
+  int i; // [sp+CCh] [-14h]
+
+  sub_12524(v5, "tjb3csFt0rrutrh_wiv5__fi}k_1ih`{xIcrhsoyBmyw1CyT3rvxStT_jq40_zrq(", 0x40u);
+  sub_12524(v4, "(", 0x80u);
+  for ( i = 0; i <= 31LL; ++i )
+    sub_12724((unsigned __int8)v5[v4[i]]);
+  sub_12724(10);
+  return 0;
+}
+```
+
+但是这两个函数一个是 `memcpy`，一个是 `fputc`。并没有找到实际的加密，而且那一串字符也并不像是加密的样子。
+
+所以我查看了 wp 这题真正考的**不是逆向算法，而是 “架构识别 + 环境搭建”。**
+
+从汇编层面也能看出来汇编码与正常的 x64 和 x86 的汇编码不一样。
+
+不是所有题都是 x86/x64，还有 ARM、MIPS、RISC-V……。遇到不认识的架构，要知道怎么查、怎么搭环境、怎么跑起来。很多时候，**能把程序跑起来，就已经赢了**。
+
+  1\. **安装 Docker**
+
+  2\. **拉取镜像并运行**：
+
+```bash
+sudo docker run --privileged -v /home:/home -it sorear/fedora-riscv-wip
+```
+
+  3\. **进入容器后运行程序：**
+
+```bash
+cd /home/[用户名]/[文件夹]
+./riskv_and_reward
+```
+
+程序会直接输出 flag。
+
+```text
+BITSCTF{s0m3_r1sc5_4r3_w0rth_1t}
 ```
 
 ------
