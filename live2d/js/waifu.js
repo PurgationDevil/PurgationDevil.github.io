@@ -143,8 +143,10 @@ function initLive2d() {
 initLive2d();
 
 /* ---------- 标签页后台/前台管理 ----------
- * 后台时：暂停一言轮询、粒子背景、看板娘渲染，让标签页可以深度休眠；
- * 前台时：两个动画错峰恢复，避开浏览器解冻瞬间合成层集中重建造成的卡顿。
+ * 后台时：暂停一言轮询、粒子背景、看板娘渲染，隐藏全屏 canvas 合成层，让标签页可以深度休眠；
+ * 前台时：不立即恢复——浏览器解冻瞬间是 OS 换页 + WebGL 纹理重传（pio 模型约 6MB）的最高峰，
+ * 立即恢复动画会让切回瞬间巨卡。改为静默等待首次用户交互（或 2.5s 兜底）后再错峰恢复：
+ * 切回瞬间页面是纯静态轻量 DOM，滚动/点击立刻流畅，动画稍后错峰出现。
  */
 function startHitokotoTimer() {
     if (window.hitokotoTimer) clearInterval(window.hitokotoTimer);
@@ -170,6 +172,8 @@ function setParticlesRunning(run) {
 
 var particlesResumeTimer = null;
 var live2dResumeTimer = null;
+var resumeFallbackTimer = null;
+var resumeInteractionEvents = ['mousemove', 'pointerdown', 'keydown', 'wheel', 'touchstart'];
 
 // 后台时隐藏全屏 canvas 合成层（visibility:hidden 不触发 reflow、不丢 WebGL 上下文），
 // 让浏览器解冻瞬间只需恢复轻量 DOM，合成层随后错峰重建
@@ -181,34 +185,59 @@ function setCanvasesHidden(hidden) {
     }
 }
 
+function clearResumeTimers() {
+    if (particlesResumeTimer) { clearTimeout(particlesResumeTimer); particlesResumeTimer = null; }
+    if (live2dResumeTimer) { clearTimeout(live2dResumeTimer); live2dResumeTimer = null; }
+    if (resumeFallbackTimer) { clearTimeout(resumeFallbackTimer); resumeFallbackTimer = null; }
+    for (var i = 0; i < resumeInteractionEvents.length; i++) {
+        document.removeEventListener(resumeInteractionEvents[i], resumeOnInteraction);
+    }
+}
+
+function resumeOnInteraction() {
+    if (document.hidden || !resumeFallbackTimer) return; // 未处于待恢复状态则忽略
+    doResume(false);
+}
+
+// 错峰恢复：粒子先起、看板娘 300ms 后起，削平单次渲染高峰
+function doResume(immediate) {
+    clearResumeTimers();
+    particlesResumeTimer = setTimeout(function () {
+        var el = document.getElementById('particles-js');
+        if (el) el.style.visibility = '';
+        setParticlesRunning(true);
+        particlesResumeTimer = null;
+    }, immediate ? 0 : 200);
+    live2dResumeTimer = setTimeout(function () {
+        // 先恢复绘制再显示，避免 preserveDrawingBuffer:false 下的透明闪烁
+        window.__live2dPaused = false;
+        var el = document.getElementById('live2d');
+        if (el) el.style.visibility = '';
+        var cc = document.getElementById('clickCanvas');
+        if (cc) cc.style.visibility = '';
+        live2dResumeTimer = null;
+    }, immediate ? 300 : 500);
+    if (!window.hitokotoTimer) startHitokotoTimer();
+}
+
 document.addEventListener('visibilitychange', function () {
     if (document.hidden) {
         if (window.hitokotoTimer) {
             clearInterval(window.hitokotoTimer);
             window.hitokotoTimer = null;
         }
-        if (particlesResumeTimer) { clearTimeout(particlesResumeTimer); particlesResumeTimer = null; }
-        if (live2dResumeTimer) { clearTimeout(live2dResumeTimer); live2dResumeTimer = null; }
+        clearResumeTimers();
         setParticlesRunning(false);
         window.__live2dPaused = true;
         setCanvasesHidden(true);
     } else {
-        // 错峰恢复：粒子 300ms、看板娘 600ms，削平解冻瞬间的渲染高峰
-        particlesResumeTimer = setTimeout(function () {
-            var el = document.getElementById('particles-js');
-            if (el) el.style.visibility = '';
-            setParticlesRunning(true);
-            particlesResumeTimer = null;
-        }, 300);
-        live2dResumeTimer = setTimeout(function () {
-            // 先恢复绘制再显示，避免 preserveDrawingBuffer:false 下的透明闪烁
-            window.__live2dPaused = false;
-            var el = document.getElementById('live2d');
-            if (el) el.style.visibility = '';
-            var cc = document.getElementById('clickCanvas');
-            if (cc) cc.style.visibility = '';
-            live2dResumeTimer = null;
-        }, 600);
-        if (!window.hitokotoTimer) startHitokotoTimer();
+        // 交互驱动恢复：首次交互立即错峰恢复；兜底 2.5s 后即使无交互也恢复
+        resumeFallbackTimer = setTimeout(function () {
+            resumeFallbackTimer = null;
+            doResume(false);
+        }, 2500);
+        for (var i = 0; i < resumeInteractionEvents.length; i++) {
+            document.addEventListener(resumeInteractionEvents[i], resumeOnInteraction, { passive: true });
+        }
     }
 });
