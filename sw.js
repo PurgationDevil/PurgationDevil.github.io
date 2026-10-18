@@ -161,6 +161,20 @@ var fetchHelper = {
  *
  *  void respondWith(Promise<Response> r);
  */
+
+// 弱网超时：网络请求超过此时长即视为不可用，立即回落缓存，避免弱网白屏久等
+const WEAK_NET_TIMEOUT = 4000;
+
+function withTimeout(promise, ms) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('network timeout')), ms);
+    promise.then(
+      value => { clearTimeout(timer); resolve(value); },
+      error => { clearTimeout(timer); reject(error); }
+    );
+  });
+}
+
 self.addEventListener('fetch', event => {
   // logs for debugging
   //console.log(`fetch ${event.request.url}`)
@@ -182,87 +196,24 @@ self.addEventListener('fetch', event => {
       return;
     }
 
-    // Stale-while-revalidate for possiblily dynamic content
-    // similar to HTTP's stale-while-revalidate: https://www.mnot.net/blog/2007/12/12/stale
-    // Upgrade from Jake's to Surma's: https://gist.github.com/surma/eb441223daaedf880801ad80006389f1
+    // Network-first: 联网时优先返回最新内容（无需"检测更新→提示刷新"流程）；
+    // 请求失败或超时(WEAK_NET_TIMEOUT)才回落缓存，弱网(如火车上)不会长时间白屏等待。
+    // 缓存在后台静默更新，下次断网时用的就是最新版本。
     const cached = caches.match(event.request);
     const fetched = fetch(getCacheBustingUrl(event.request), { cache: "no-store" });
-    const fetchedCopy = fetched.then(resp => resp.clone());
-    
-    // Call respondWith() with whatever we get first.
-    // Promise.race() resolves with first one settled (even rejected)
-    // If the fetch fails (e.g disconnected), wait for the cache.
-    // If there’s nothing in cache, wait for the fetch.
-    // If neither yields a response, return offline pages.
+
     event.respondWith(
-      Promise.race([fetched.catch(_ => cached), cached])
-        .then(resp => resp || fetched)
+      withTimeout(fetched, WEAK_NET_TIMEOUT)
+        .catch(_ => cached)
+        .then(resp => resp || cached)
         .catch(_ => caches.match('offline.html'))
     );
 
-    // Update the cache with the version we fetched (only for ok status)
+    // 缓存静默更新（仅写入成功响应），供下次断网兜底使用
     event.waitUntil(
-      Promise.all([fetchedCopy, caches.open(CACHE)])
-        .then(([response, cache]) => response.ok && cache.put(event.request, response))
+      Promise.all([fetched, caches.open(CACHE)])
+        .then(([response, cache]) => response.ok && cache.put(event.request, response.clone()))
         .catch(_ => {/* eat any errors */ })
     );
-
-    // If one request is a HTML naviagtion, checking update!
-    if (isNavigationReq(event.request)) {
-      // you need "preserve logs" to see this log
-      // cuz it happened before navigating
-      console.log(`fetch ${event.request.url}`)
-      event.waitUntil(revalidateContent(cached, fetchedCopy))
-    }
   }
 });
-
-
-/**
- * Broadcasting all clients with MessageChannel API
- */
-function sendMessageToAllClients(msg) {
-  self.clients.matchAll().then(clients => {
-    clients.forEach(client => {
-      console.log(client);
-      client.postMessage(msg)
-    })
-  })
-}
-
-/**
- * Broadcasting all clients async
- */
-function sendMessageToClientsAsync(msg) {
-  // waiting for new client alive with "async" setTimeout hacking
-  // https://twitter.com/Huxpro/status/799265578443751424
-  // https://jakearchibald.com/2016/service-worker-meeting-notes/#fetch-event-clients
-  setTimeout(() => {
-    sendMessageToAllClients(msg)
-  }, 1000)
-}
-
-/**
- * if content modified, we can notify clients to refresh
- * TODO: Gh-pages rebuild everything in each release. should find a workaround (e.g. ETag with cloudflare)
- * 
- * @param  {Promise<response>} cachedResp  [description]
- * @param  {Promise<response>} fetchedResp [description]
- * @return {Promise}
- */
-function revalidateContent(cachedResp, fetchedResp) {
-  // revalidate when both promise resolved
-  return Promise.all([cachedResp, fetchedResp])
-    .then(([cached, fetched]) => {
-      const cachedVer = cached.headers.get('last-modified')
-      const fetchedVer = fetched.headers.get('last-modified')
-      console.log(`"${cachedVer}" vs. "${fetchedVer}"`);
-      if (cachedVer !== fetchedVer) {
-        sendMessageToClientsAsync({
-          'command': 'UPDATE_FOUND',
-          'url': fetched.url
-        })
-      }
-    })
-    .catch(err => console.log(err))
-}
