@@ -1114,9 +1114,30 @@ window.addEventListener('load', function() {
             document.body.appendChild(waifuScript);
             
             waifuScript.onload = function() {
-                // 加载模型
-                loadlive2d("live2d", "{{ site.baseurl }}/live2d/model/pio/model.json");
-                console.log("Pio 酱模型加载完成");
+                // 加载模型（节日优先 > 季节兜底）
+                // 节日：万圣节 10/25-11/2 -> Halloween；春节 1/20-2/20 -> Winter；儿童节 6/1 -> Kids
+                // 季节：冬 12/1/2 -> Winter2；春 3/4/5 -> Sakura；夏 6/7/8 -> Dress；秋 9/10/11 -> School
+                var now = new Date();
+                var m = now.getMonth() + 1; // 1-12
+                var d = now.getDate();
+                var seasonModel;
+                if ((m === 10 && d >= 25) || (m === 11 && d <= 2)) {
+                    seasonModel = 'model.json'; // Halloween-Costume（原文件即为万圣节装）
+                } else if ((m === 1 && d >= 20) || (m === 2 && d <= 20)) {
+                    seasonModel = 'model-springfestival.json'; // 春节到元宵
+                } else if (m === 6 && d === 1) {
+                    seasonModel = 'model-kids.json'; // 儿童节
+                } else if (m === 12 || m <= 2) {
+                    seasonModel = 'model-winter.json'; // Winter2
+                } else if (m <= 5) {
+                    seasonModel = 'model-spring.json'; // Sakura
+                } else if (m <= 8) {
+                    seasonModel = 'model-summer.json'; // Dress
+                } else {
+                    seasonModel = 'model-autumn.json'; // School
+                }
+                loadlive2d("live2d", "{{ site.baseurl }}/live2d/model/pio/" + seasonModel);
+                console.log("Pio 酱模型加载完成（当前季节服装: " + seasonModel + "）");
             };
         };
     }, 3000); // 3秒后加载
