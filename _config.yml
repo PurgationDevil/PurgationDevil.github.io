@@ -76,7 +76,7 @@ sidebar-about-description: "Web/逆向入门 | 努力学习呦~🥰"
 sidebar-avatar: https://github.com/PurgationDevil.png # use absolute URL, seeing it's used in both `/` and `/about/`
 
 # Featured Tags
-featured-tags: false # whether or not using Feature-Tags
+featured-tags: true # whether or not using Feature-Tags
 featured-condition-size: 1 # A tag will be featured if the size of it is more than this condition value
 
 # Progressive Web Apps
@@ -91,7 +91,7 @@ announcement:
   enabled: true
   title: 📢 公告
   items:
-    - "提升逆向基础"
+    - "提升英语 (_　_)。゜zｚＺ"
 
 # Friends
 friends:
