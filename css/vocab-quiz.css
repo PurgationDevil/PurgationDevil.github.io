@@ -154,32 +154,9 @@
   border-radius: 14px;
 }
 .vq-entry h3 {
-  margin: 0 0 8px 0;
+  margin: 0 0 14px 0;
   font-size: 20px;
   color: var(--vq-primary);
-}
-.vq-entry p {
-  margin: 0 0 14px 0;
-  font-size: 14px;
-  color: var(--vq-text-3);
-}
-.vq-entry-stats {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 18px;
-  font-size: 13px;
-  color: var(--vq-muted);
-}
-.vq-entry-stats span {
-  padding: 3px 12px;
-  background: rgba(var(--vq-primary-rgb), 0.08);
-  border-radius: 999px;
-}
-.vq-wrong-tag {
-  background: rgba(var(--vq-danger-rgb), 0.08) !important;
-  color: var(--vq-danger) !important;
 }
 
 /* ============= 2. 模块选择页 ============= */
