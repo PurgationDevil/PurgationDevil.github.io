@@ -34,8 +34,6 @@
   root.innerHTML = `
     <div class="vq-page vq-entry" id="vq-entry">
       <h3>📚 四级词汇训练</h3>
-      <p>从 Unit 1-10 里选一个模块开始刷题</p>
-      <div class="vq-entry-stats" id="vq-entry-stats">加载中…</div>
       <button type="button" class="vq-btn" id="vq-go-select">🚀 开始训练单词</button>
     </div>
 
@@ -205,22 +203,13 @@
         var ms = {};
         data.forEach(function (w) { ms[w.meaning] = true; });
         ALL_MEANINGS = Object.keys(ms);
-        updateEntryStats();
       })
       .catch(function (err) {
-        $('vq-entry-stats').textContent = '题库加载失败：' + err.message;
-        $('vq-go-select').disabled = true;
+        console.error('[vocab-quiz] 题库加载失败：', err);
+        var btn = $('vq-go-select');
+        btn.disabled = true;
+        btn.textContent = '题库加载失败';
       });
-  }
-
-  function updateEntryStats() {
-    if (!WORDS) return;
-    var totalWords = WORDS.length;
-    var wbWords = wrongBookTotalWords();
-    $('vq-entry-stats').innerHTML =
-      '<span>📖 题库 ' + totalWords + ' 词</span>' +
-      '<span>📚 Unit 1-10</span>' +
-      (wbWords > 0 ? '<span class="vq-wrong-tag">📖 错题本 ' + wbWords + ' 词</span>' : '');
   }
 
   // ---------- 工具 ----------
@@ -478,7 +467,6 @@
       removeFromWrongBook(rmBtn.getAttribute('data-word'), parseInt(rmBtn.getAttribute('data-unit'), 10));
       renderWrongBook();
       renderUnitGrid();
-      updateEntryStats();
       return;
     }
 
@@ -494,7 +482,6 @@
         clearWrongBook();
         renderWrongBook();
         renderUnitGrid();
-        updateEntryStats();
       }
     }
   });
