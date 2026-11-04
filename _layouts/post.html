@@ -15,6 +15,12 @@ layout: default
 <script defer src="/js/word-reader.js"></script>
 {% endif %}
 
+<!-- 英语单词随机测试（仅 front matter 中 vocab-quiz: true 的文章加载） -->
+{% if page.vocab-quiz %}
+<link rel="stylesheet" href="/css/vocab-quiz.css">
+<script defer src="/js/vocab-quiz.js"></script>
+{% endif %}
+
 <!-- Image to hack wechat -->
 <!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
 <!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
