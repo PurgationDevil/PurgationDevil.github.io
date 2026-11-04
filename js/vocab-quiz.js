@@ -62,11 +62,15 @@
         <span class="vq-progress-text" id="vq-progress-text">0/0</span>
       </div>
       <div class="vq-question">
-        <div class="vq-word" id="vq-word">—</div>
+        <div class="vq-word-row">
+          <span class="vq-word" id="vq-word">—</span>
+          <button type="button" class="vq-speak" id="vq-speak" title="朗读单词" aria-label="朗读单词">🔊</button>
+        </div>
         <div class="vq-hint" id="vq-hint"></div>
       </div>
       <div class="vq-options" id="vq-options"></div>
       <div class="vq-quiz-footer">
+        <button type="button" class="vq-btn secondary small" id="vq-prev-btn" disabled>← 上一题</button>
         <div class="vq-feedback info" id="vq-feedback">请选择正确的中文释义</div>
         <button type="button" class="vq-btn secondary vq-hidden" id="vq-next-btn">下一题 →</button>
       </div>
@@ -213,6 +217,25 @@
   }
 
   // ---------- 工具 ----------
+  var synth = ('speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined')
+    ? window.speechSynthesis : null;
+
+  function speakWord(text) {
+    if (!synth || !text) return;
+    try {
+      synth.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US';
+      u.rate = 0.9;
+      u.pitch = 1;
+      synth.speak(u);
+    } catch (e) {}
+  }
+  function stopSpeak() {
+    if (!synth) return;
+    try { synth.cancel(); } catch (e) {}
+  }
+
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -281,10 +304,12 @@
   function startQuiz(unit) {
     currentUnit = unit;
     currentPool = UNIT_MAP[unit] || [];
-    queue = shuffle(currentPool);
+    queue = shuffle(currentPool).map(function (w) { return { w: w, chosen: null, options: null }; });
     queueIdx = 0;
     correctCount = 0;
     wrongList = [];
+    if (autoNextTimer) { clearTimeout(autoNextTimer); autoNextTimer = null; }
+    stopSpeak();
 
     $('vq-quiz-unit-label').textContent = 'Unit ' + unit + '（' + currentPool.length + ' 词）';
     go('quiz');
@@ -295,75 +320,117 @@
     if (queueIdx >= queue.length) { showResult(); return; }
     if (autoNextTimer) { clearTimeout(autoNextTimer); autoNextTimer = null; }
 
-    var item = queue[queueIdx];
+    var q = queue[queueIdx];
+    var item = q.w;
+    var answered = q.chosen !== null;
+
     $('vq-progress-bar').style.width = Math.round((queueIdx / queue.length) * 100) + '%';
     $('vq-progress-text').textContent = (queueIdx + 1) + '/' + queue.length;
-    $('vq-correct').textContent = correctCount;
-    $('vq-wrong').textContent = wrongList.length;
+    syncStats();
 
     $('vq-word').textContent = item.word;
     $('vq-hint').textContent = item.mnemonic ? '💡 ' + item.mnemonic : '';
-    $('vq-feedback').className = 'vq-feedback info';
-    $('vq-feedback').textContent = '请选择正确的中文释义';
-    $('vq-next-btn').classList.add('vq-hidden');
+    $('vq-prev-btn').disabled = queueIdx === 0;
 
-    var distractors = pickDistractors(item.meaning, 3);
-    var options = shuffle([item.meaning].concat(distractors));
+    // 选项顺序只在首次进入该题时生成，返回上一题时保持不变
+    if (!q.options) {
+      q.options = shuffle([item.meaning].concat(pickDistractors(item.meaning, 3)));
+    }
     var letters = ['A', 'B', 'C', 'D'];
 
     var html = '';
-    options.forEach(function (opt, i) {
+    q.options.forEach(function (opt, i) {
       var isCorrect = opt === item.meaning;
-      html += '<button type="button" class="vq-option" data-correct="' + (isCorrect ? '1' : '0') + '">' +
+      var cls = 'vq-option';
+      var dis = '';
+      if (answered) {
+        dis = ' disabled';
+        if (opt === q.chosen) cls += isCorrect ? ' selected-correct' : ' selected-wrong';
+        else if (isCorrect) cls += ' show-correct';
+      }
+      html += '<button type="button" class="' + cls + '" data-correct="' + (isCorrect ? '1' : '0') +
+        '" data-opt="' + esc(opt) + '"' + dis + '>' +
         '<span class="vq-letter">' + letters[i] + '</span>' + esc(opt) + '</button>';
     });
     $('vq-options').innerHTML = html;
+
+    if (answered) {
+      if (q.chosen === item.meaning) {
+        $('vq-feedback').className = 'vq-feedback ok';
+        $('vq-feedback').textContent = '✓ 回答正确！';
+      } else {
+        $('vq-feedback').className = 'vq-feedback no';
+        $('vq-feedback').textContent = '✗ 正确答案：' + item.meaning;
+      }
+      $('vq-next-btn').classList.remove('vq-hidden');
+      $('vq-next-btn').textContent = (queueIdx === queue.length - 1) ? '查看结果 →' : '下一题 →';
+    } else {
+      $('vq-feedback').className = 'vq-feedback info';
+      $('vq-feedback').textContent = '请选择正确的中文释义';
+      $('vq-next-btn').classList.add('vq-hidden');
+    }
+  }
+
+  // 从 queue 派生统计，回退/前进时不会重复累加
+  function syncStats() {
+    var c = 0;
+    var wl = [];
+    queue.forEach(function (q) {
+      if (q.chosen === null) return;
+      if (q.chosen === q.w.meaning) c++;
+      else wl.push({ word: q.w.word, meaning: q.w.meaning, unit: currentUnit });
+    });
+    correctCount = c;
+    wrongList = wl;
+    $('vq-correct').textContent = correctCount;
+    $('vq-wrong').textContent = wrongList.length;
   }
 
   function onOptionClick(e) {
     var btn = e.target.closest('.vq-option');
     if (!btn || btn.disabled) return;
 
-    var allOpts = $('vq-options').querySelectorAll('.vq-option');
-    allOpts.forEach(function (o) { o.disabled = true; });
+    var q = queue[queueIdx];
+    if (q.chosen !== null) return;
 
-    var correct = btn.getAttribute('data-correct') === '1';
-    var item = queue[queueIdx];
+    var chosen = btn.getAttribute('data-opt');
+    q.chosen = chosen;
 
-    if (correct) {
-      correctCount++;
-      btn.classList.add('selected-correct');
-      $('vq-feedback').className = 'vq-feedback ok';
-      $('vq-feedback').textContent = '✓ 回答正确！';
+    var item = q.w;
+    if (chosen === item.meaning) {
       removeFromWrongBook(item.word, currentUnit);
       recordResult(item.word, true);
-      autoNextTimer = setTimeout(nextQuestion, 1200);
     } else {
-      btn.classList.add('selected-wrong');
-      $('vq-feedback').className = 'vq-feedback no';
-      $('vq-feedback').textContent = '✗ 正确答案：' + item.meaning;
-      allOpts.forEach(function (o) {
-        if (o.getAttribute('data-correct') === '1') o.classList.add('show-correct');
-      });
       addToWrongBook(item.word, item.meaning, currentUnit);
       recordResult(item.word, false);
-      wrongList.push({ word: item.word, meaning: item.meaning, unit: currentUnit });
-      $('vq-next-btn').classList.remove('vq-hidden');
     }
-    $('vq-correct').textContent = correctCount;
-    $('vq-wrong').textContent = wrongList.length;
+
+    renderQuestion();
+    if (chosen === item.meaning) {
+      autoNextTimer = setTimeout(nextQuestion, 1200);
+    }
   }
 
-  function nextQuestion() { queueIdx++; renderQuestion(); }
+  function nextQuestion() {
+    if (queueIdx < queue.length) { queueIdx++; renderQuestion(); }
+  }
+
+  function prevQuestion() {
+    if (queueIdx > 0) { queueIdx--; renderQuestion(); }
+  }
 
   function showResult() {
     if (autoNextTimer) { clearTimeout(autoNextTimer); autoNextTimer = null; }
+    stopSpeak();
     go('result');
-    var rate = currentPool.length === 0 ? 0 :
-      Math.round((correctCount / currentPool.length) * 100);
+    syncStats();
+    var answered = 0;
+    queue.forEach(function (q) { if (q.chosen !== null) answered++; });
+    var rate = answered === 0 ? 0 : Math.round((correctCount / answered) * 100);
     $('vq-score').textContent = rate + '%';
     $('vq-result-detail').textContent =
-      'Unit ' + currentUnit + '：正确 ' + correctCount + ' / ' + currentPool.length +
+      'Unit ' + currentUnit + '：正确 ' + correctCount + ' / ' + answered + ' 题' +
+      (queue.length > answered ? '（未做完 ' + (queue.length - answered) + ' 题）' : '') +
       (wrongList.length > 0 ? ' · 错误 ' + wrongList.length : ' · 全部答对 🎉');
     $('vq-restart-btn').dataset.unit = currentUnit;
 
@@ -440,6 +507,12 @@
   root.addEventListener('click', function (e) {
     var t = e.target;
 
+    // 朗读当前单词（点 🔊 或单词本身）
+    if (t.id === 'vq-speak' || t.id === 'vq-word') {
+      if (queueIdx < queue.length) speakWord(queue[queueIdx].w.word);
+      return;
+    }
+
     // 返回按钮
     var backBtn = t.closest('[data-go]');
     if (backBtn) { go(backBtn.getAttribute('data-go')); return; }
@@ -475,6 +548,7 @@
     else if (id === 'vq-go-wrongbook') { renderWrongBook(); go('wrongbook'); }
     else if (id === 'vq-quit-quiz') { if (confirm('确定结束本轮测试？')) showResult(); }
     else if (id === 'vq-next-btn') nextQuestion();
+    else if (id === 'vq-prev-btn') prevQuestion();
     else if (id === 'vq-restart-btn') startQuiz(parseInt(t.dataset.unit, 10));
     else if (id === 'vq-back-to-select') { renderUnitGrid(); go('select'); }
     else if (id === 'vq-clear-wrong') {
