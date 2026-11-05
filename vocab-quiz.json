@@ -37,8 +37,8 @@
   },
   {
     "word": "union",
-    "meaning": "协会（stude ts u io 学生会）",
-    "mnemonic": "结合在一起的东西",
+    "meaning": "协会",
+    "mnemonic": "结合在一起的东西；students union 学生会",
     "unit": 1
   },
   {
@@ -169,8 +169,8 @@
   },
   {
     "word": "advance",
-    "meaning": "进步；前进（“a + 一个字母” 打头的表示强调；一再的）",
-    "mnemonic": "ad 一再的 + vance 万斯；万斯一再的进步",
+    "meaning": "进步；前进",
+    "mnemonic": "ad 一再的 + vance 万斯；万斯一再的进步；“a + 一个字母” n 打头的表示强调；一再的",
     "unit": 1
   },
   {
@@ -439,8 +439,8 @@
   },
   {
     "word": "beach",
-    "meaning": "沙滩）",
-    "mnemonic": "peach 桃子（连皮都吃",
+    "meaning": "沙滩",
+    "mnemonic": "连皮都吃；peach 桃子",
     "unit": 1
   },
   {
@@ -463,8 +463,8 @@
   },
   {
     "word": "embrace",
-    "meaning": "拥抱（em 表示进入）",
-    "mnemonic": "em 进入 + brace 支架，拥抱",
+    "meaning": "拥抱",
+    "mnemonic": "em 进入 + brace 支架，拥抱；em 表示进入",
     "unit": 1
   },
   {
@@ -1213,8 +1213,8 @@
   },
   {
     "word": "gamble",
-    "meaning": "赌博；风险博”）",
-    "mnemonic": "“干(赌",
+    "meaning": "赌博；风险",
+    "mnemonic": "“干(赌)博”",
     "unit": 1
   },
   {
@@ -1255,8 +1255,8 @@
   },
   {
     "word": "release",
-    "meaning": "释放出去）",
-    "mnemonic": "re 阿姨 lease 立刻死了，防止有人释放（传播",
+    "meaning": "释放",
+    "mnemonic": "传播；re 阿姨 lease 立刻死了，防止有人释放出去",
     "unit": 1
   },
   {
@@ -1399,8 +1399,8 @@
   },
   {
     "word": "resort",
-    "meaning": "采取；求助于；胜地（阿姨分类，要求助）",
-    "mnemonic": "度假",
+    "meaning": "采取；求助于；(度假)胜地",
+    "mnemonic": "阿姨分类，要求助",
     "unit": 1
   },
   {
@@ -1417,8 +1417,8 @@
   },
   {
     "word": "dozen",
-    "meaning": "打；十二个",
-    "mnemonic": "一",
+    "meaning": "(一)打；十二个",
+    "mnemonic": "",
     "unit": 1
   },
   {
@@ -2011,8 +2011,8 @@
   },
   {
     "word": "appoint",
-    "meaning": "安排；分配；确定（ap 一再的 + po 指着，分配指派）",
-    "mnemonic": "时间或地点",
+    "meaning": "安排；分配；确定(时间或地点)",
+    "mnemonic": "ap 一再的 + point 指着，分配指派",
     "unit": 2
   },
   {
@@ -2875,14 +2875,14 @@
   },
   {
     "word": "flavor",
-    "meaning": "味；特色",
-    "mnemonic": "道",
+    "meaning": "味(道)；特色",
+    "mnemonic": "",
     "unit": 2
   },
   {
     "word": "flavour",
-    "meaning": "味；特色",
-    "mnemonic": "道",
+    "meaning": "味(道)；特色",
+    "mnemonic": "",
     "unit": 2
   },
   {
@@ -3013,8 +3013,8 @@
   },
   {
     "word": "miracle",
-    "meaning": "奇迹，《白雪公主》里的魔镜就是可以产生奇迹的镜子）",
-    "mnemonic": "音似 mirror 镜子（“妹弱”",
+    "meaning": "奇迹",
+    "mnemonic": "“妹弱”；音似 mirror 镜子，《白雪公主》里的魔镜就是可以产生奇迹的镜子",
     "unit": 2
   },
   {
@@ -3043,8 +3043,8 @@
   },
   {
     "word": "delegate",
-    "meaning": "代表；授（dele “delete 删除” gate 门，把门都删除的人）",
-    "mnemonic": "权",
+    "meaning": "代表；授(权)",
+    "mnemonic": "dele “delete 删除” gate 门，把门都删除的人",
     "unit": 2
   },
   {
@@ -4063,8 +4063,8 @@
   },
   {
     "word": "fetch",
-    "meaning": "拿来（“饭吃”）",
-    "mnemonic": "去",
+    "meaning": "(去)拿来",
+    "mnemonic": "“饭吃”",
     "unit": 3
   },
   {
@@ -4387,14 +4387,14 @@
   },
   {
     "word": "bump",
-    "meaning": "撞击；碰撞（撞击的声音）",
-    "mnemonic": "声",
+    "meaning": "撞击(声)；碰撞",
+    "mnemonic": "撞击的声音",
     "unit": 3
   },
   {
     "word": "bumper",
-    "meaning": "保险杠",
-    "mnemonic": "汽车上的",
+    "meaning": "(汽车上的)保险杠",
+    "mnemonic": "",
     "unit": 3
   },
   {
@@ -4567,8 +4567,8 @@
   },
   {
     "word": "intimate",
-    "meaning": "亲密的（i mate 狱友）",
-    "mnemonic": "in 内心 ti 提 mate 朋友，密友",
+    "meaning": "亲密的",
+    "mnemonic": "in 内心 ti 提 mate 朋友，密友；inmate 狱友",
     "unit": 3
   },
   {
@@ -4663,8 +4663,8 @@
   },
   {
     "word": "cable",
-    "meaning": "缆绳；电缆住的）",
-    "mnemonic": "ca “开”，可以开(抓",
+    "meaning": "缆绳；电缆",
+    "mnemonic": "ca “开”，可以开(抓)住的",
     "unit": 3
   },
   {
@@ -4975,14 +4975,14 @@
   },
   {
     "word": "bid",
-    "meaning": "出价（“必得”）",
-    "mnemonic": "拍卖",
+    "meaning": "(拍卖)出价",
+    "mnemonic": "“必得”",
     "unit": 4
   },
   {
     "word": "ban",
-    "meaning": "禁令；禁止”）",
-    "mnemonic": "“扳(倒",
+    "meaning": "禁令；禁止",
+    "mnemonic": "“扳(倒)”",
     "unit": 4
   },
   {
@@ -4993,14 +4993,14 @@
   },
   {
     "word": "prohibit",
-    "meaning": "阻止 前面）",
-    "mnemonic": "等于 prevent，在 hibit(就当人名",
+    "meaning": "阻止",
+    "mnemonic": "等于 prevent，在 hibit(就当人名) 前面",
     "unit": 4
   },
   {
     "word": "exhibit",
-    "meaning": "展示；展览 往外，展示）",
-    "mnemonic": "hibit(就当人名",
+    "meaning": "展示；展览",
+    "mnemonic": "hibit(就当人名) 往外，展示",
     "unit": 4
   },
   {
@@ -5059,8 +5059,8 @@
   },
   {
     "word": "inflate",
-    "meaning": "膨胀；涨价（i 不 flat 平）",
-    "mnemonic": "使",
+    "meaning": "膨胀；(使)涨价",
+    "mnemonic": "in 不 flat 平",
     "unit": 4
   },
   {
@@ -5413,8 +5413,8 @@
   },
   {
     "word": "clay",
-    "meaning": "肉体；黏土；陶土（mud 泥土 “妈的”）",
-    "mnemonic": "“可累”",
+    "meaning": "肉体；黏土；陶土",
+    "mnemonic": "“可累”；mud 泥土 “妈的”",
     "unit": 4
   },
   {
@@ -5785,8 +5785,8 @@
   },
   {
     "word": "timber",
-    "meaning": "木材”）",
-    "mnemonic": "“踢不(烂",
+    "meaning": "木材",
+    "mnemonic": "“踢不(烂)”",
     "unit": 4
   },
   {
@@ -6115,8 +6115,8 @@
   },
   {
     "word": "agenda",
-    "meaning": "日程安排）",
-    "mnemonic": "a 一 gen “件” da 大 (事",
+    "meaning": "日程安排",
+    "mnemonic": "a 一 gen “件” da 大 (事)",
     "unit": 4
   },
   {
@@ -6349,8 +6349,8 @@
   },
   {
     "word": "opposition",
-    "meaning": "反对",
-    "mnemonic": "强烈",
+    "meaning": "(强烈)反对",
+    "mnemonic": "",
     "unit": 4
   },
   {
@@ -6571,8 +6571,8 @@
   },
   {
     "word": "scope",
-    "meaning": "范围；领域，是在一定范围领域内）",
-    "mnemonic": "s 美女 cope 处理；解决（“抠破”，需要处理",
+    "meaning": "范围；领域",
+    "mnemonic": "“抠破”，需要处理；s 美女 cope 处理；解决，是在一定范围领域内",
     "unit": 4
   },
   {
@@ -7111,8 +7111,8 @@
   },
   {
     "word": "ally",
-    "meaning": "伙伴；盟友”）",
-    "mnemonic": "“爱丽(丝",
+    "meaning": "伙伴；盟友",
+    "mnemonic": "“爱丽(丝)”",
     "unit": 5
   },
   {
@@ -7495,8 +7495,8 @@
   },
   {
     "word": "bait",
-    "meaning": "诱饵特”喜欢做诱饵）",
-    "mnemonic": "“贝(壳",
+    "meaning": "诱饵",
+    "mnemonic": "“贝(壳)特”喜欢做诱饵",
     "unit": 5
   },
   {
@@ -7567,8 +7567,8 @@
   },
   {
     "word": "entitle",
-    "meaning": "给某权力或资格）",
-    "mnemonic": "使有标题，title 标题（“抬头”",
+    "meaning": "给某权力或资格",
+    "mnemonic": "“抬头”；使有标题，title 标题",
     "unit": 5
   },
   {
@@ -7807,8 +7807,8 @@
   },
   {
     "word": "factory",
-    "meaning": "工厂）",
-    "mnemonic": "现实地点（以 ary 或 ory 结尾的是地点的意思",
+    "meaning": "工厂",
+    "mnemonic": "以 ary 或 ory 结尾的是地点的意思；现实地点",
     "unit": 5
   },
   {
@@ -8485,8 +8485,8 @@
   },
   {
     "word": "geometry",
-    "meaning": "几何（geo “几何”）",
-    "mnemonic": "学",
+    "meaning": "几何(学)",
+    "mnemonic": "geo “几何”",
     "unit": 5
   },
   {
@@ -8617,8 +8617,8 @@
   },
   {
     "word": "pond",
-    "meaning": "水池；池塘（“泡的”）",
-    "mnemonic": "人工",
+    "meaning": "水池；(人工)池塘",
+    "mnemonic": "“泡的”",
     "unit": 6
   },
   {
@@ -8773,8 +8773,8 @@
   },
   {
     "word": "spirit",
-    "meaning": "精神就精神）",
-    "mnemonic": "Sprite 雪碧，喝完它(雪碧",
+    "meaning": "精神",
+    "mnemonic": "Sprite 雪碧，喝完它(雪碧)就精神",
     "unit": 6
   },
   {
@@ -9523,8 +9523,8 @@
   },
   {
     "word": "loophole",
-    "meaning": "漏洞hole 洞）",
-    "mnemonic": "loop 圈；环状物（100 个人爬成一个圈",
+    "meaning": "漏洞",
+    "mnemonic": "100 个人爬成一个圈；loop 圈；环状物hole 洞",
     "unit": 6
   },
   {
@@ -9655,8 +9655,8 @@
   },
   {
     "word": "critic",
-    "meaning": "评论家；批评家，然后点评这个点评那个）",
-    "mnemonic": "cr 想象一个人吧，谁都可以，这里用超人。cr 超人 i 爱 tic 提个(棍",
+    "meaning": "评论家；批评家",
+    "mnemonic": "cr 想象一个人吧，谁都可以，这里用超人。cr 超人 i 爱 tic 提个(棍)，然后点评这个点评那个",
     "unit": 6
   },
   {
@@ -10189,8 +10189,8 @@
   },
   {
     "word": "fare",
-    "meaning": "费用；票（far 远 e 鹅，想要去看远方的鹅需要运费）",
-    "mnemonic": "价",
+    "meaning": "费用；票(价)",
+    "mnemonic": "far 远 e 鹅，想要去看远方的鹅需要运费",
     "unit": 6
   },
   {
@@ -10261,8 +10261,8 @@
   },
   {
     "word": "retail",
-    "meaning": "零售）",
-    "mnemonic": "re 重复 tail 切，tail 尾巴；切（断尾求生",
+    "meaning": "零售",
+    "mnemonic": "断尾求生；re 重复 tail 切，tail 尾巴；切",
     "unit": 6
   },
   {
@@ -11017,8 +11017,8 @@
   },
   {
     "word": "orchestra",
-    "meaning": "管弦乐队，管弦乐队演奏时都是用胸部发力）",
-    "mnemonic": "chest 胸膛（che 车 st 街",
+    "meaning": "管弦乐队",
+    "mnemonic": "che 车 st 街；chest 胸膛，管弦乐队演奏时都是用胸部发力",
     "unit": 7
   },
   {
@@ -11407,8 +11407,8 @@
   },
   {
     "word": "decorate",
-    "meaning": "装饰；装修”，弟弟的核心就是一套房子）",
-    "mnemonic": "de 弟弟 cor “core 核心（“靠”，依靠的就是核心",
+    "meaning": "装饰；装修",
+    "mnemonic": "“靠”，依靠的就是核心；de 弟弟 cor “core 核心”，弟弟的核心就是一套房子",
     "unit": 7
   },
   {
@@ -11971,8 +11971,8 @@
   },
   {
     "word": "arrow",
-    "meaning": "箭；箭头）",
-    "mnemonic": "row 是弓，ar “哎呦”（被箭扎了",
+    "meaning": "箭；箭头",
+    "mnemonic": "被箭扎了；row 是弓，ar “哎呦”",
     "unit": 7
   },
   {
@@ -12259,8 +12259,8 @@
   },
   {
     "word": "cancer",
-    "meaning": "癌症；毒瘤（ca 可以 cer “死”，癌症可以死了）",
-    "mnemonic": "社会",
+    "meaning": "癌症；(社会)毒瘤",
+    "mnemonic": "can 可以 cer “死”，癌症可以死了",
     "unit": 8
   },
   {
@@ -12763,8 +12763,8 @@
   },
   {
     "word": "ceremony",
-    "meaning": "仪式；典礼蒙你给你一个典礼）",
-    "mnemonic": "“赛罗蒙你”，赛罗（奥特曼",
+    "meaning": "仪式；典礼",
+    "mnemonic": "奥特曼；“赛罗蒙你”，赛罗蒙你给你一个典礼",
     "unit": 8
   },
   {
@@ -14569,8 +14569,8 @@
   },
   {
     "word": "sophisticated",
-    "meaning": "老练的；见多识广的）",
-    "mnemonic": "sophomore 大二（“稍”好",
+    "meaning": "老练的；见多识广的",
+    "mnemonic": "“稍”好；sophomore 大二",
     "unit": 9
   },
   {
@@ -14959,8 +14959,8 @@
   },
   {
     "word": "doubtful",
-    "meaning": "不确定的；怀疑的）",
-    "mnemonic": "doubt 怀疑（“打他”",
+    "meaning": "不确定的；怀疑的",
+    "mnemonic": "“打他”；doubt 怀疑",
     "unit": 9
   },
   {
@@ -16555,8 +16555,8 @@
   },
   {
     "word": "attempt",
-    "meaning": "尝试；企图；试图）",
-    "mnemonic": "一再的 tempt 诱惑（“太妹扑他”",
+    "meaning": "尝试；企图；试图",
+    "mnemonic": "“太妹扑他”；一再的 tempt 诱惑",
     "unit": 10
   },
   {
@@ -16639,8 +16639,8 @@
   },
   {
     "word": "helicopter",
-    "meaning": "直升机ter “它”）",
-    "mnemonic": "heli “海里” cop 警察（“靠谱”",
+    "meaning": "直升机",
+    "mnemonic": "“靠谱”；heli “海里” cop 警察ter “它”",
     "unit": 10
   },
   {
@@ -17089,8 +17089,8 @@
   },
   {
     "word": "panel",
-    "meaning": "专题讨论组喽”）",
-    "mnemonic": "“拍(板",
+    "meaning": "专题讨论组",
+    "mnemonic": "“拍(板)喽”",
     "unit": 10
   },
   {
