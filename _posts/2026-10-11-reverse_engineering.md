@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "攻防世界 reverse II"
+title: "逆向工程刷题"
 toc: true
-date: 2026-10-24
+date: 2026-11-19
 categories: 分类名称
 tags: [逆向工程]
 ---
@@ -610,9 +610,201 @@ print(max_num,'\n',chr(max_num))
 
 然后把上面的代码的 `ch` 换成 170 就可以了。（字符是非常规的，但这是 ai 随手出的，以思维为主而非答案）
 
+------
 
+## BUU REVERSE4（三维迷宫）
 
+> 快来解救npy
 
+exe 可执行文件，无壳。一眼断定迷宫题（std::string::string，分配空间+二维字符串）
+
+```cpp
+int __fastcall main(int argc, const char **argv, const char **envp)
+{
+  bool v3; // bl
+  char *v4; // rax
+  unsigned __int64 v5; // rbx
+  char c; // [rsp+2Fh] [rbp-51h] BYREF
+  std::string str2; // [rsp+30h] [rbp-50h] BYREF
+  std::string p_str2; // [rsp+40h] [rbp-40h] BYREF
+  char s; // [rsp+57h] [rbp-29h]
+  int j; // [rsp+58h] [rbp-28h]
+  int i; // [rsp+5Ch] [rbp-24h]
+
+  _main();
+  std::string::string(&str2, &str);
+  printf(_format);
+  printf("But the castle of the bad woman is very big, you must find the right way!\n");
+  printf("press F to entry the castle\n");
+  printf("\n");
+  s = getchar();
+  if ( s != 70 )
+    exit_0(0);
+  for ( i = 0; ; ++i )
+  {
+    scanf("%c", &c);
+    if ( c == 10 )
+    {
+      if ( i )
+        break;
+    }
+    input[i] = c;
+  }
+  std::string::string(&p_str2, &str2);
+  v3 = check(0, 0, &p_str2, input) == 0;
+  std::string::~string(&p_str2);
+  if ( v3 )
+    exit_0(0);
+  for ( j = 0; ; ++j )
+  {
+    v5 = j;
+    if ( v5 >= std::string::length(&win) )
+      break;
+    v4 = (char *)std::string::operator[](&win, j);
+    putchar(*v4);
+  }
+  printf("\n");
+  system_0("pause");
+  std::string::~string(&str2);
+  return 0;
+}
+```
+
+并没有看到迷宫字符串在哪里，一会去动态调试里找。先看执行逻辑吧。
+
+19~31 先输入一个字符等于 ‘70’，也就是 F。然后输入 10 个字符为 flag。
+
+33、35、36 验证。其中 33 行为验证逻辑。
+
+点开 `check(0, 0, &p_str2, input)`
+
+```cpp
+int __cdecl check(int x, int y, std::string *p_str2, char *input)
+{
+  int cnt; // [rsp+28h] [rbp-8h]
+  int judge; // [rsp+2Ch] [rbp-4h]
+  int xa; // [rsp+40h] [rbp+10h] BYREF
+  int ya; // [rsp+48h] [rbp+18h] BYREF
+  std::string *p_str2a; // [rsp+50h] [rbp+20h]
+  char *inputa; // [rsp+58h] [rbp+28h]
+
+  xa = x;
+  ya = y;
+  p_str2a = p_str2;
+  inputa = input;
+  judge = 0;
+  for ( cnt = 0; inputa[cnt]; ++cnt )
+  {
+    if ( inputa[cnt] == 97 ) //  a
+    {
+      sub_6(&xa, &ya); //  --*b
+      sub_7(xa, ya);
+    }
+    if ( inputa[cnt] == 100 ) //  d
+    {
+      sub_4(&xa, &ya); //  ++*b
+      sub_9(xa, ya);
+    }
+    if ( inputa[cnt] == 119 ) //  w
+    {
+      sub_5(&xa, &ya); //  *a -= 5
+      sub_7(xa, ya);
+    }
+    if ( inputa[cnt] == 115 ) //  s
+    {
+      sub_3(&xa, &ya); //  *a += 5
+      sub_8(xa, ya);
+    }
+    if ( inputa[cnt] == 113 ) //  q
+    {
+      if ( *(_BYTE *)std::string::operator[](p_str2a, xa + ya) != 50 )
+        exit_0(0);
+      sub_2(&xa, &ya); //  *a -= 25
+      sub_9(xa, ya);
+    }
+    if ( inputa[cnt] == 101 ) //  e
+    {
+      if ( *(_BYTE *)std::string::operator[](p_str2a, xa + ya) != 50 )
+        exit_0(0);
+      sub_1(&xa, &ya); //  *a += 25
+      sub_9(xa, ya);
+    }
+    if ( *(_BYTE *)std::string::operator[](p_str2a, xa + ya) == 51 )
+      return 1;
+    if ( *(char *)std::string::operator[](p_str2a, xa + ya) <= 48
+      || *(char *)std::string::operator[](p_str2a, xa + ya) > 52 )
+    {
+      exit_0(0);
+    }
+  }
+  return judge;
+}
+```
+
+这个还是有一点无效代码的。比如这个 `sub_7` 至 `sub_9` 函数内部没有任何执行代码。包括这个多此一举的 a 和 b、x 和 y，因为最终算的就是它们的总和，也就是一维数组（地图）。所以在写脚本的时候直接归为一类。
+
+```python
+moves = {'a':-1, 'd':1, 'w':-5, 's':5, 'q':-25, 'e':25}
+```
+
+其中在最下面这个可以分析出数字代表的含义。1~4 可走，2 可穿越（第三个维度，也就是 q 和 e 的作用）。地图是 5 \* 5 \* 5 大小。
+
+至于地图码这个东西需要在 strings 视图找到它，或者动态调试可以看见部分（太长被截断，需要定位原地址）。地图码是在 C++ 全局变量的构造函数，属于程序启动时自动执行的代码。所以在 main 函数看不到。
+
+最后，下面是地图一类逆向代码的逻辑框架，基本是固定的。（我并不会写，下次遇到就这个模板改了）
+
+读入路径 → 模拟移动 → 检查格子合法性 → 到达终点
+
+```python
+from collections import deque
+
+maze = list("11000011100001000012000000002000010001100010100111000100011000100001120000000000000002100001011011100000000000111000010000113")
+moves = {'a':-1, 'd':1, 'w':-5, 's':5, 'q':-25, 'e':25}
+
+# BFS
+queue = deque()
+queue.append((0, ""))          # (当前位置, 已经走的路径)
+visited = set([0])             # 记录走过的位置
+
+found = False
+
+while queue:
+    pos, path = queue.popleft()
+
+    if maze[pos] == '3':
+        print(path)
+        found = True
+        break
+
+    for key, delta in moves.items():
+        new_pos = pos + delta
+
+        # 1. 检查是否越界
+        if not (0 <= new_pos < 125):
+            continue
+
+        # 2. 检查新位置是不是墙
+        if maze[new_pos] not in '1234':
+            continue
+
+        # 3. 特殊限制：只有当前是 '2' 才能按 q 或 e
+        if key in ('q', 'e') and maze[pos] != '2':
+            continue
+
+        # 4. 没走过才加入队列
+        if new_pos not in visited:
+            visited.add(new_pos)
+            queue.append((new_pos, path + key))
+
+if not found:
+    print("没找到路径")
+```
+
+最终 flag（题目提交有问题，flag 就是下面这个）：
+
+```text
+dsddssdesassassddeasaawwaeddssdd
+```
 
 ------
 
