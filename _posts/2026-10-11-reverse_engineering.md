@@ -2,7 +2,7 @@
 layout: post
 title: "逆向工程刷题"
 toc: true
-date: 2026-11-23
+date: 2026-11-27
 categories: 分类名称
 tags: [逆向工程]
 ---
@@ -506,9 +506,9 @@ BITSCTF{s0m3_r1sc5_4r3_w0rth_1t}
 
 ---
 
-## ai 出题 The C++ Gatekeeper（C++ 虚函数）
+## AI 出题 The C++ Gatekeeper（C++ 虚函数）
 
-我没想到现在的 ai 这么厉害，都能简单的出题了。整好刚学完逆向 C 语言进阶，这道题很适配啊。
+我没想到现在的 AI 这么厉害，都能简单的出题了。整好刚学完逆向 C 语言进阶，这道题很适配啊。
 
 ```cpp
 bool __fastcall Easy_verify(_QWORD *this, char *input)
@@ -565,7 +565,7 @@ int __cdecl main(int argc, const char **argv, const char **envp)
 }
 ```
 
-首先来分析 main 函数：输入给 v4，然后检测输入字符串长度并进行分配空间选择虚函数地址。最后在 `if` 处执行虚函数。
+首先来分析 `main` 函数：输入给 `v4`，然后检测输入字符串长度并进行分配空间选择虚函数地址。最后在 `if` 处执行虚函数。
 
 `Easy_vtable` 是一条死路，既要字符串小于等于 5，又要字符串等于 10，所以一定是大于 5 的密码。
 
@@ -608,7 +608,7 @@ for i in range(256):
 print(max_num,'\n',chr(max_num))
 ```
 
-然后把上面的代码的 `ch` 换成 170 就可以了。（字符是非常规的，但这是 ai 随手出的，以思维为主而非答案）
+然后把上面的代码的 `ch` 换成 170 就可以了。（字符是非常规的，但这是 AI 随手出的，以思维为主而非答案）
 
 ---
 
@@ -808,7 +808,7 @@ dsddssdesassassddeasaawwaeddssdd
 
 ---
 
-## BUU - REVERSE2（z3 详解）
+## BUU REVERSE2（z3 详解）
 
 > 魔方行动①
 
@@ -1008,6 +1008,161 @@ else:
 ```
 
 脚本后半部分就是在爆破/求解这个 `key`，找到一个能让所有 32 个异或结果都合法的值。找到 key 之后，把 `key ^ 每个数字` 转成字符，就能得到最终的字符串。
+
+---
+
+## BUU ezmac（Mac 环境纯静态）
+
+> 简单的加密逻辑
+
+没有 Mac 环境，只能静态分析了。好在整个文件很小，只有 2 kb。
+
+```c
+__int64 __fastcall start(__int64 a1, __int64 a2, __int64 a3, void *a4, void *a5, void *a6, void *a7, void *a8)
+{
+  signed __int64 v8; // x0
+  signed __int64 v9; // x0
+  _BYTE *v11; // x5
+
+  v8 = mac_syscall(33554436, (void *)1, aInputYourFlag, (void *)0x11, a4, a5, a6, a7, a8);
+  v9 = mac_syscall(33554435, 0, &qword_10000403B, (void *)0x40, a4, a5, a6, a7, a8);
+  if ( v9 )
+  {
+    v11 = (char *)&qword_10000403B + v9 - 1;
+    if ( *v11 == 10 )
+      *v11 = 0;
+  }
+  return sub_1000003F4();
+}
+```
+
+这是直接调用 Mac 的系统调用输出 “Input your flag...”，然后从键盘（标准输入）读取到 `unk_10000403B` 这个缓冲区。
+
+ASCII 10 是 `\n`。所以后面的 `if` 是遇到换行就停止录入。
+
+就目前看来还没有什么其他的可疑字符串及加密 / 验证逻辑。进入 `sub_1000003F4()`，调用 `sub_100000410()`，进入 `sub_100000410()`。
+
+```c
+__int64 sub_100000410()
+{
+  __int64 v0; // x12
+  __int64 v1; // x13
+
+  do
+    v0 += v1--;
+  while ( v1 );
+  __yield();
+  __wfe();
+  return sub_10000045C();
+}
+```
+
+一眼初始化，后期查资料：`YIELD`：提示处理器可以切换；`WFE`：Wait For Event（低功耗等待）。
+
+进入 `sub_10000045C()`，调用 `sub_100000634()`，进入 `sub_100000634()`。
+
+```c
+__int64 __fastcall sub_100000634(__int64 a1, __int64 a2, __int64 a3, __int64 a4, __int64 a5, char a6)
+{
+  unsigned __int8 *v6; // x21
+  char v7; // w3
+  unsigned __int8 *v8; // x21
+  int v9; // t1
+  unsigned __int8 v11; // w3
+  unsigned __int8 *v12; // x21
+
+  while ( 1 )
+  {
+    v9 = *v6;
+    v8 = v6 + 1;
+    v7 = v9;
+    if ( !v9 )
+      break;
+    v11 = v7 ^ a6++;
+    v12 = v8 - 1;
+    *v12 = v11;
+    v6 = v12 + 1;
+  }
+  return sub_100000654();
+}
+```
+
+代码整一堆，总结后就是下面这个逻辑：
+
+```c
+while (*v6) {
+    *v6 = *v6 ^ a6;
+    a6++;	// 密钥每次 +1
+    v6++;
+}
+```
+
+这个函数既精简，又有很多干扰分析的代码。继续进入 `sub_100000654()`，调用 `sub_100000660()`，进入 `sub_100000660()`。
+
+```c
+__int64 __usercall sub_100000660@<X0>(unsigned __int8 *a1@<X8>)
+{
+  unsigned __int8 *v1; // x9
+  int v2; // w0
+  int v3; // t1
+  int v4; // t1
+
+  do
+  {
+    v3 = *a1++;
+    v2 = v3;
+    v4 = *v1++;
+    if ( v2 != v4 )
+      return sub_100000678();
+  }
+  while ( v2 );
+  return sub_100000694();
+}
+```
+
+这里就是比较了，简化一下逻辑：
+
+```c
+do {
+    if (*a1++ != *v1++)
+        return sub_100000678();	// 不相等 → 失败
+} while (上一个字符不是 0);
+
+return sub_100000694();			// 完全相等 → 成功
+```
+
+但是到这里依然没有可疑字符串，调出 strings 窗口，能看见 `unk_100004022` 大概率就是原码。
+
+*其实如果有 Mac 环境的化在判断里下动态调试就能直接拿到原码。*
+
+交差引用发现原来 `sub_100000634()` 函数就是对原码进行加密。
+
+但是由于只有原文没有密钥，所以对 key 进行爆破（key 只是 1 字节大小容易爆破）。*这里没办法了找 AI 写的*
+
+```python
+data = bytes.fromhex("7D7B687F69784478722174767522267B7C7E787A2E2D7F2D")
+
+for key in range(256):              # 枚举所有可能的初始密钥（0~255）
+    k = key                         # 用临时变量，防止修改循环变量
+    dec = bytearray()               # 用来存放解密后的结果
+
+    for c in data:                  # 遍历每一个加密字节
+        dec.append(c ^ k)           # 异或解密
+        k = (k + 1) & 0xff          # 密钥加1，并限制在0~255
+
+    try:
+        s = dec.decode("ascii")     # 尝试按ASCII解码
+        if s.isprintable():         # 只显示能正常打印的字符串
+            print(f"key={key:3d} (0x{key:02x}) → {s}")
+    except:
+        pass                        # 解码失败就跳过
+```
+
+flag：
+
+```text
+DASCTF{83c720da35436cc0}
+```
 
 ------
 
