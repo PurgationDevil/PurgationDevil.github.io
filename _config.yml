@@ -97,5 +97,6 @@ announcement:
 friends:
   [
   { title: "wnahom 的博客（算法）", href: "https://wnahom.github.io/" },
-  { title: "daifresne 的博客（硬件）", href: "https://daifresne.github.io/" }
+  { title: "daifresne 的博客（硬件）", href: "https://daifresne.github.io/" },
+  { title: "阿兰·亚瑟 的博客（内网）", href: "https://arthurblog.pages.dev/" }
   ]
